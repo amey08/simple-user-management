@@ -6,6 +6,7 @@ class HomePage extends Component {
   constructor(props, context) {
     super(props, context);
     
+    this.rowFormatter = this.rowFormatter.bind(this);
     this.tableData = [{
       'name': "Abc",
       'email': 'am@g.co',
@@ -59,13 +60,15 @@ class HomePage extends Component {
       },
       {
         key: 'action',
-        name: 'Action'
+        name: 'Action',
+        formatter: this.rowFormatter,
+        getRowMetaData: (row)=>row
       } ];
     
     this.createRows();
     this.state = null;
     this.handleClick = this.handleClick.bind(this);
-    this.toggle = this.toggle.bind(this);
+    this.addNewUser = this.addNewUser.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.setLocalStorageData = this.setLocalStorageData.bind(this);
     this.updateLocalStorageData = this.updateLocalStorageData.bind(this);
@@ -114,21 +117,27 @@ class HomePage extends Component {
     this._rows = updatedRow;
   };
 
-  rowFormatter = (a, b) => {
+  rowFormatter = (a) => {
     return <button onClick={(e)=>this.handleClick(a, e)} >Edit</button>
   }
 
-  handleClick = (a, b) => {
-    
+  handleClick = (rowData) => {
+    console.log(rowData);
+    this.setState({
+      openEdit: true,
+      listScreen: false,
+      editData: rowData.dependentValues
+    });
   }
   rowGetter = (i) => {
     return this._rows[i];
   };
 
-  toggle (){
+  addNewUser (){
     this.setState({
       openEdit: true,
-      listScreen: false
+      listScreen: false,
+      editData: ''
     });
   }
   onSubmit (_obj){
@@ -140,7 +149,7 @@ class HomePage extends Component {
   }
 
   render() {
-    let pageComponent = this.state.openEdit ? (<EditPage onSubmitClick={this.onSubmit}/>) : (
+    let pageComponent = this.state.openEdit ? (<EditPage onSubmitClick={this.onSubmit} editData= {this.state.editData}/>) : (
       <ReactDataGrid 
           columns={this._columns}
           rowGetter={this.rowGetter}
@@ -151,7 +160,10 @@ class HomePage extends Component {
     return (
       <div>
         <p className="App-intro">
-          <button onClick={(e)=>this.toggle()} >Add New User </button>
+        {
+          this.state.listScreen && 
+          <button onClick={(e)=>this.addNewUser()} >Add New User </button>
+        }
         </p>
         {pageComponent}                
       </div>
