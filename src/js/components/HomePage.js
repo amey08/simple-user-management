@@ -5,29 +5,29 @@ import EditPage from './EditPage';
 class HomePage extends Component {
   constructor(props, context) {
     super(props, context);
-    
+
     this.rowFormatter = this.rowFormatter.bind(this);
     this.tableData = [{
       'name': "Abc",
       'email': 'am@g.co',
       'mobile': "0123456789",
-    },{
+    }, {
       'name': "Def",
       'email': 'df@e.co',
       'mobile': "2132134455",
-    },{
+    }, {
       'name': "Ghi",
       'email': 'gh@h.co',
       'mobile': "8899988900",
-    },{
+    }, {
       'name': "Jkl",
       'email': 'am@i.co',
       'mobile': "7768877688",
-    },{
+    }, {
       'name': "Mno",
       'email': 'mo@k.co',
       'mobile': "5169189422",
-    },{
+    }, {
       'name': "Pqrs",
       'email': 'psq@r.co',
       'mobile': "8897781445",
@@ -62,9 +62,9 @@ class HomePage extends Component {
         key: 'action',
         name: 'Action',
         formatter: this.rowFormatter,
-        getRowMetaData: (row)=>row
-      } ];
-    
+        getRowMetaData: (row) => row
+      }];
+
     this.createRows();
     this.state = null;
     this.handleClick = this.handleClick.bind(this);
@@ -72,35 +72,45 @@ class HomePage extends Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.setLocalStorageData = this.setLocalStorageData.bind(this);
     this.updateLocalStorageData = this.updateLocalStorageData.bind(this);
-
+    this.editData = {};
     this.state = {
       openEdit: false,
-      listScreen: true,
-      editData: ''
+      listScreen: true
     };
   }
-  
-  setLocalStorageData(_obj){
+
+  setLocalStorageData(_obj) {
     localStorage.setItem("tableData", JSON.stringify(_obj));
   }
-  updateLocalStorageData (dataKey, _obj){
+  updateLocalStorageData(dataKey, _obj, _boolFlag) {
     let tableData = JSON.parse(localStorage.getItem(dataKey));
-    if(!_obj){
+    if (!_obj) {
       return tableData;
     }
-    else{
-      tableData.push(_obj);
-      this.createRows(tableData);
+    else {
+      if (_boolFlag) {
+        let temp = tableData.map((data) => {
+          if (data.name === _obj.name || data.email === _obj.email || data.mobile === _obj.mobile) {
+            return (Object.assign({}, data, _obj));
+          }
+          return data;
+        });
+        this.createRows(temp);
+      } else {
+        tableData.push(_obj);
+        this.createRows(tableData);
+      }
+
     }
   }
 
   createRows(_data) {
     let rows = this.tableData;
-    if(_data){
+    if (_data) {
       rows = _data;
     }
     let updatedRow = [];
-    if(rows){
+    if (rows) {
       for (let i = 0; i < rows.length; i++) {
         updatedRow.push({
           name: rows[i].name,
@@ -113,60 +123,63 @@ class HomePage extends Component {
         });
       }
     }
-    this.setLocalStorageData(this.tableData);
+    this.setLocalStorageData(updatedRow);
     rows = this.updateLocalStorageData("tableData");
     this._rows = updatedRow;
   };
 
   rowFormatter = (a) => {
-    return <button onClick={(e)=>this.handleClick(a, e)} >Edit</button>
+    return <button onClick={(e) => this.handleClick(a, e)} >Edit</button>
   }
 
   handleClick = (rowData) => {
-    console.log(rowData);
+    this.editData = rowData.dependentValues;
     this.setState({
       openEdit: true,
       listScreen: false,
-      editData: rowData.dependentValues
+      rowEdit: true
     });
   }
   rowGetter = (i) => {
     return this._rows[i];
   };
 
-  addNewUser (){
+  addNewUser() {
     this.setState({
       openEdit: true,
       listScreen: false,
-      editData: ''
+      rowEdit: false
     });
   }
-  onSubmit (_obj){
-    this.updateLocalStorageData("tableData",_obj);
+  onSubmit(_obj, rowUpdate) {
+    if (_obj)
+      this.updateLocalStorageData("tableData", Object.assign({}, _obj), rowUpdate);
+
     this.setState({
       openEdit: false,
-      listScreen: true
+      listScreen: true,
+      rowEdit: false
     });
   }
 
   render() {
-    let pageComponent = this.state.openEdit ? (<EditPage onSubmitClick={this.onSubmit} editData= {this.state.editData}/>) : (
-      <ReactDataGrid 
-          columns={this._columns}
-          rowGetter={this.rowGetter}
-          rowsCount={this._rows.length}
-          minHeight={500}
-        />
-    );  
+    let pageComponent = this.state.openEdit ? (<EditPage onSubmitClick={this.onSubmit} fromEditButton={this.state.rowEdit} editData={this.state.rowEdit ? this.editData : undefined} />) : (
+      <ReactDataGrid
+        columns={this._columns}
+        rowGetter={this.rowGetter}
+        rowsCount={this._rows.length}
+        minHeight={500}
+      />
+    );
     return (
       <div>
         <p className="App-intro">
-        {
-          this.state.listScreen && 
-          <button onClick={(e)=>this.addNewUser()} >Add New User </button>
-        }
+          {
+            this.state.listScreen &&
+            <button onClick={(e) => this.addNewUser()} >Add New User </button>
+          }
         </p>
-        {pageComponent}                
+        {pageComponent}
       </div>
     );
   }
