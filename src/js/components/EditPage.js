@@ -32,7 +32,7 @@ class EditPage extends Component {
   }
   updateDataSet(_dataObj){
     this.setState({isDisabled : this.checkButtonState(_dataObj), newData: _dataObj});
-  }
+    }
   onSubmit(){
       if(this.checkForupdate(this.props.editData, this.state.newData)){
         console.log("inside onSubmit");
@@ -50,11 +50,7 @@ class EditPage extends Component {
     }
   }
   updateInputValue(evt) {
-      let _objData = {
-        name: '',
-        email: '',
-        mobile: ''
-      };
+      let _objData = this.state.newData;
         switch(evt.target.name){
             case "name":
             _objData.name = evt.target.value;

@@ -75,7 +75,8 @@ class HomePage extends Component {
 
     this.state = {
       openEdit: false,
-      listScreen: true
+      listScreen: true,
+      editData: ''
     };
   }
   
